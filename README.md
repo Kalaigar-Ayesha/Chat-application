@@ -19,7 +19,7 @@ Highlights:
 
 ```js
 MONGODB_URI=...
-PORT=5001
+PORT=5000  # or change both front and backend to same port
 JWT_SECRET=...
 
 CLOUDINARY_CLOUD_NAME=...
@@ -28,6 +28,20 @@ CLOUDINARY_API_SECRET=...
 
 NODE_ENV=development
 ```
+
+> **Local MongoDB**  
+> For a fully local setup you must have MongoDB running on your machine or inside a container. The simplest URI is `mongodb://localhost:27017/chat-app`.  
+> Examples:
+>
+> ```bash
+> # start using the system service (Windows/Mac/Linux)
+> mongod --dbpath /path/to/data
+>
+> # or use Docker:
+> docker run --name chat-mongo -p 27017:27017 -d mongo
+> ```
+>
+> Once the server is up, set `MONGODB_URI` in your `.env` accordingly and then run `npm run seed` from the `backend` folder to populate sample users.
 
 ### Build the app
 
@@ -40,3 +54,4 @@ npm run build
 ```shell
 npm start
 ```
+# Chat-application
