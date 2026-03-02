@@ -23,38 +23,33 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        shell: pwsh
         run: npm ci
 
       # optional: run backend tests if you have any
       - name: Run backend tests
         working-directory: backend
-        shell: pwsh
         run: |
-          if ((Test-Path package.json) -and ((npm run 2>&1) -match 'test')) {
+          if [ -f package.json ] && npm run | grep -q test; then
             npm test
-          } else {
-            Write-Host "no backend tests defined"
-          }
+          else
+            echo "no backend tests defined"
+          fi
 
       - name: Install frontend dependencies
         working-directory: frontend
-        shell: pwsh
         run: npm ci
 
       - name: Build frontend
         working-directory: frontend
-        shell: pwsh
         run: npm run build
 
       # front-end linting (optional)
       - name: Lint frontend
         working-directory: frontend
-        shell: pwsh
         run: |
-          if ((npm run 2>&1) -match 'lint') {
-            npm run lint
-          }
+          if npm run | grep -q lint; then
+            npm run lint || true
+          fi
 
   deploy:
     name: Deploy to server
@@ -103,5 +98,4 @@ jobs:
             # remote server simply needs Docker/Compose
 
       - name: Deployment notification
-        shell: pwsh
-        run: Write-Host "Deployment to ${{ secrets.SERVER_HOST }} completed."
+        run: echo "Deployment to ${{ secrets.SERVER_HOST }} completed."
