@@ -20,6 +20,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Debug - Check working directory
         run: |
           echo "Current directory:"
@@ -30,11 +35,6 @@ jobs:
           node --version
           echo "NPM version:"
           npm --version
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
 
       - name: Install backend dependencies
         run: |
