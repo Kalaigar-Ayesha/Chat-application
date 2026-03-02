@@ -22,13 +22,12 @@ jobs:
           node-version: 18
 
       - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
+        run: cd backend && npm ci
 
       # optional: run backend tests if you have any
       - name: Run backend tests
-        working-directory: backend
         run: |
+          cd backend
           if [ -f package.json ] && npm run | grep -q test; then
             npm test
           else
@@ -36,17 +35,15 @@ jobs:
           fi
 
       - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
+        run: cd frontend && npm ci
 
       - name: Build frontend
-        working-directory: frontend
-        run: npm run build
+        run: cd frontend && npm run build
 
       # front-end linting (optional)
       - name: Lint frontend
-        working-directory: frontend
         run: |
+          cd frontend
           if npm run | grep -q lint; then
             npm run lint || true
           fi
