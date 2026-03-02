@@ -23,6 +23,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
+        shell: pwsh
         run: npm ci
 
       # optional: run backend tests if you have any
@@ -38,10 +39,12 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
+        shell: pwsh
         run: npm ci
 
       - name: Build frontend
         working-directory: frontend
+        shell: pwsh
         run: npm run build
 
       # front-end linting (optional)
