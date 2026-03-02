@@ -85,6 +85,15 @@ jobs:
         uses: actions/checkout@v4
 
       # transfer entire repo (including generated build folder) to remote
+      # ensure we actually have credentials before invoking the action
+      - name: Validate SSH credentials
+        run: |
+          if [ -z "${{ secrets.SERVER_SSH_KEY }}" ] && [ -z "${{ secrets.SERVER_PASSWORD }}" ]; then
+            echo "::error::No SSH key or password defined!"
+            echo "Please add SERVER_SSH_KEY (private key) or SERVER_PASSWORD to your repository secrets."
+            exit 1
+          fi
+
       - name: Copy sources to remote host
         uses: appleboy/scp-action@v0.1.1
         with:
