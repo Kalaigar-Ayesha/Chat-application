@@ -1,0 +1,104 @@
+name: "CI/CD Pipeline"
+
+# This workflow builds the frontend and backend, then deploys the
+# application to a remote Linux server running Docker + nginx via SSH.
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      # optional: run backend tests if you have any
+      - name: Run backend tests
+        working-directory: backend
+        shell: pwsh
+        run: |
+          if ((Test-Path package.json) -and ((npm run 2>&1) -match 'test')) {
+            npm test
+          } else {
+            Write-Host "no backend tests defined"
+          }
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      # front-end linting (optional)
+      - name: Lint frontend
+        working-directory: frontend
+        shell: pwsh
+        run: |
+          if ((npm run 2>&1) -match 'lint') {
+            npm run lint
+          }
+
+  deploy:
+    name: Deploy to server
+    runs-on: self-hosted
+    needs: build
+    environment: production
+
+    steps:
+      - name: Checkout code again
+        uses: actions/checkout@v4
+
+      # transfer entire repo (including generated build folder) to remote
+      - name: Copy sources to remote host
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT        }}
+          source: "./"
+          target: ${{ secrets.SERVER_PROJECT_PATH }}
+
+      # run deployment commands over ssh
+      - name: SSH and run docker-compose
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.SERVER_PROJECT_PATH }}
+            # if the repo already exists, update it; otherwise it was just
+            # written by the previous SCP step
+            if [ -d .git ]; then
+              git reset --hard HEAD
+              git clean -ffdx
+            fi
+
+            # bring up the stack with latest code and images
+            docker-compose pull || true
+            docker-compose up -d --build --remove-orphans
+
+            # note: nginx is running inside the frontend container; the
+            # remote server simply needs Docker/Compose
+
+      - name: Deployment notification
+        shell: pwsh
+        run: Write-Host "Deployment to ${{ secrets.SERVER_HOST }} completed."
