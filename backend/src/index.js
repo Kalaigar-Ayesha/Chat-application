@@ -13,7 +13,14 @@ import { app, server } from "./lib/socket.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT;
+// validate required environment variables (fail early)
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET is not defined. Add it to your .env file.");
+  process.exit(1);
+}
+
+// fall back to 5000 when PORT isn’t defined in the environment
+const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
 app.use(express.json());
