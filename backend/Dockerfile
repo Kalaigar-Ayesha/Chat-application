@@ -7,8 +7,7 @@ WORKDIR /app
 
 # Install dependencies based on the package manifest first so we can leverage layer caching
 COPY package*.json ./
-RUN npm install --production
-
+RUN npm ci --only=production
 # Bundle app source
 COPY . .
 
