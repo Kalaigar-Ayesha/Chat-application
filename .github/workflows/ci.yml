@@ -14,8 +14,8 @@ defaults:
     shell: bash
 
 jobs:
-  build:
-    name: Build and Test
+  build-test-lint-and-docker:
+    name: Test, Lint & Build Docker
     runs-on: ubuntu-latest
 
     services:
@@ -42,30 +42,53 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Run backend tests
+      - name: Run backend unit tests
         working-directory: backend
-        env:
-          MONGO_URI: mongodb://mongo:27017/chat-app
         run: |
-          if npm run | grep -q test; then
-            npm test
-          else
-            echo "No backend tests defined"
-          fi
+          npm test
 
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm test -- --run
+
       - name: Build frontend
         working-directory: frontend
         run: npm run build
 
-      - name: Lint frontend
+      - name: Lint frontend with ESLint
         working-directory: frontend
         run: |
           if npm run | grep -q lint; then
-            npm run lint || true
+            npm run lint
           else
             echo "No lint script found"
           fi
+
+      - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/chat-app-backend:latest
+
+      - name: Build and push frontend image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/chat-app-frontend:latest
