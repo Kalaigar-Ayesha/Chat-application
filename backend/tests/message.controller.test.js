@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../src/lib/socket.js';
+import { app } from '../src/app.js';
 import User from '../src/models/user.model.js';
 import Message from '../src/models/message.model.js';
 import jwt from 'jsonwebtoken';

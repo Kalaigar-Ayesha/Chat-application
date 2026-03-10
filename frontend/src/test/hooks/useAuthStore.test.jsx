@@ -1,35 +1,48 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { act } from 'react'
-import useAuthStore from '../../store/useAuthStore'
 
-// Mock axios
-vi.mock('axios', () => ({
-  default: {
+vi.mock('../../lib/axios.js', () => ({
+  axiosInstance: {
     get: vi.fn(),
-    post: vi.fn()
-  }
+    post: vi.fn(),
+    put: vi.fn(),
+  },
 }))
 
-// Mock socket.io-client
-vi.mock('../../lib/socket', () => ({
+vi.mock('react-hot-toast', () => ({
   default: {
-    connect: vi.fn(),
-    disconnect: vi.fn()
-  }
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }))
+
+const mockSocket = {
+  connected: false,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+  on: vi.fn(),
+}
+
+vi.mock('socket.io-client', () => ({
+  io: vi.fn(() => mockSocket),
+}))
+
+import { axiosInstance } from '../../lib/axios.js'
+import { useAuthStore } from '../../store/useAuthStore'
 
 describe('useAuthStore', () => {
   beforeEach(() => {
-    // Reset store before each test
     useAuthStore.setState({
       authUser: null,
       isSigningUp: false,
       isLoggingIn: false,
       isUpdatingProfile: false,
       isCheckingAuth: true,
-      onlineUsers: []
+      onlineUsers: [],
+      socket: null,
     })
     vi.clearAllMocks()
+    mockSocket.connected = false
   })
 
   it('should initialize with default state', () => {
@@ -43,83 +56,33 @@ describe('useAuthStore', () => {
     expect(state.onlineUsers).toEqual([])
   })
 
-  it('should set auth user', () => {
-    const user = {
-      _id: '1',
-      fullName: 'Test User',
-      email: 'test@example.com'
-    }
+  it('checkAuth sets authUser and clears isCheckingAuth', async () => {
+    const user = { _id: '1', fullName: 'Test User', email: 'test@example.com' }
+    axiosInstance.get.mockResolvedValueOnce({ data: user })
 
-    act(() => {
-      useAuthStore.getState().setAuthUser(user)
+    await act(async () => {
+      await useAuthStore.getState().checkAuth()
     })
 
-    expect(useAuthStore.getState().authUser).toEqual(user)
+    const state = useAuthStore.getState()
+    expect(state.authUser).toEqual(user)
+    expect(state.isCheckingAuth).toBe(false)
   })
 
-  it('should set signing up state', () => {
+  it('connectSocket does nothing without authUser', () => {
     act(() => {
-      useAuthStore.getState().setIsSigningUp(true)
+      useAuthStore.getState().connectSocket()
     })
-
-    expect(useAuthStore.getState().isSigningUp).toBe(true)
-
-    act(() => {
-      useAuthStore.getState().setIsSigningUp(false)
-    })
-
-    expect(useAuthStore.getState().isSigningUp).toBe(false)
+    expect(useAuthStore.getState().socket).toBeNull()
   })
 
-  it('should set logging in state', () => {
-    act(() => {
-      useAuthStore.getState().setIsLoggingIn(true)
-    })
+  it('logout clears authUser on success', async () => {
+    const user = { _id: '1', fullName: 'Test User', email: 'test@example.com' }
+    useAuthStore.setState({ authUser: user })
+    axiosInstance.post.mockResolvedValueOnce({ data: {} })
 
-    expect(useAuthStore.getState().isLoggingIn).toBe(true)
-  })
-
-  it('should set updating profile state', () => {
-    act(() => {
-      useAuthStore.getState().setIsUpdatingProfile(true)
-    })
-
-    expect(useAuthStore.getState().isUpdatingProfile).toBe(true)
-  })
-
-  it('should set checking auth state', () => {
-    act(() => {
-      useAuthStore.getState().setIsCheckingAuth(false)
-    })
-
-    expect(useAuthStore.getState().isCheckingAuth).toBe(false)
-  })
-
-  it('should set online users', () => {
-    const onlineUsers = ['user1', 'user2']
-
-    act(() => {
-      useAuthStore.getState().setOnlineUsers(onlineUsers)
-    })
-
-    expect(useAuthStore.getState().onlineUsers).toEqual(onlineUsers)
-  })
-
-  it('should clear auth user on logout', () => {
-    const user = {
-      _id: '1',
-      fullName: 'Test User',
-      email: 'test@example.com'
-    }
-
-    act(() => {
-      useAuthStore.getState().setAuthUser(user)
-    })
-
-    expect(useAuthStore.getState().authUser).toEqual(user)
-
-    act(() => {
-      useAuthStore.getState().logout()
+    await act(async () => {
+      await useAuthStore.getState().logout()
     })
 
     expect(useAuthStore.getState().authUser).toBeNull()

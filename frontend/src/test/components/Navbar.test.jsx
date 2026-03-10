@@ -4,16 +4,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Navbar from '../../components/Navbar.jsx'
 
 // Mock the auth store
-vi.mock('../../store/useAuthStore', () => ({
-  useAuthStore: () => ({
-    logout: vi.fn(),
-    authUser: {
-      _id: '1',
-      fullName: 'Test User',
-      email: 'test@example.com'
-    }
-  })
-}))
+vi.mock('../../store/useAuthStore', () => ({ useAuthStore: vi.fn() }))
+
+import { useAuthStore } from '../../store/useAuthStore'
 
 const renderWithRouter = (component) => {
   return render(
@@ -26,6 +19,14 @@ const renderWithRouter = (component) => {
 describe('Navbar Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useAuthStore.mockReturnValue({
+      logout: vi.fn(),
+      authUser: {
+        _id: '1',
+        fullName: 'Test User',
+        email: 'test@example.com',
+      },
+    })
   })
 
   it('renders the app title and logo', () => {
@@ -52,10 +53,9 @@ describe('Navbar Component', () => {
   })
 
   it('renders logout button when user is authenticated', () => {
-    const { useAuthStore } = require('../../store/useAuthStore')
     const mockLogout = vi.fn()
     
-    useAuthStore.mockReturnValue({
+    useAuthStore.mockReturnValueOnce({
       logout: mockLogout,
       authUser: {
         _id: '1',

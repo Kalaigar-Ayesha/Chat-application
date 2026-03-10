@@ -2,12 +2,13 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 
 let mongoServer;
+const MONGO_SETUP_TIMEOUT_MS = 120000;
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
   await mongoose.connect(mongoUri);
-}, 30000);
+}, MONGO_SETUP_TIMEOUT_MS);
 
 afterAll(async () => {
   if (mongoose.connection.readyState !== 0) {
@@ -16,7 +17,7 @@ afterAll(async () => {
   if (mongoServer) {
     await mongoServer.stop();
   }
-}, 30000);
+}, MONGO_SETUP_TIMEOUT_MS);
 
 afterEach(async () => {
   if (mongoose.connection.readyState !== 0) {

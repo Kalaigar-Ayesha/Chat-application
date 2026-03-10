@@ -1,6 +1,7 @@
 import request from 'supertest';
-import { app } from '../src/lib/socket.js';
+import { app } from '../src/app.js';
 import User from '../src/models/user.model.js';
+import bcrypt from 'bcryptjs';
 
 describe('Auth Controller', () => {
   describe('POST /api/auth/signup', () => {
@@ -68,10 +69,12 @@ describe('Auth Controller', () => {
 
   describe('POST /api/auth/login', () => {
     beforeEach(async () => {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('password123', salt);
       const user = new User({
         fullName: 'Test User',
         email: 'login@example.com',
-        password: 'hashedpassword'
+        password: hashedPassword
       });
       await user.save();
     });
