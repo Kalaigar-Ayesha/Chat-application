@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf update -y
+dnf install -y docker awscli
+systemctl enable --now docker
+
+mkdir -p /opt/chatapp
+
+cat > /opt/chatapp/nginx.conf <<'NGINXCONF'
+${nginx_conf}
+NGINXCONF
+
+# Authenticate to ECR if needed (works even for other registries; no-op when not ECR)
+if command -v aws >/dev/null 2>&1; then
+  REGION="$$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep region | awk -F'\"' '{print $$4}')"
+  ACCOUNT_ID="$$(aws sts get-caller-identity --query Account --output text 2>/dev/null || true)"
+  if [[ -n "$${ACCOUNT_ID}" ]]; then
+    aws ecr get-login-password --region "$${REGION}" 2>/dev/null | docker login --username AWS --password-stdin "$${ACCOUNT_ID}.dkr.ecr.$${REGION}.amazonaws.com" 2>/dev/null || true
+  fi
+fi
+
+docker pull ${frontend_image}
+
+docker rm -f chat-frontend || true
+docker run -d --restart unless-stopped \
+  --name chat-frontend \
+  -p 80:80 \
+  -v /opt/chatapp/nginx.conf:/etc/nginx/nginx.conf:ro \
+  ${frontend_image}
+

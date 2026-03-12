@@ -1,0 +1,23 @@
+region                = "us-east-1"
+name_prefix            = "chatapp"
+
+vpc_cidr               = "10.0.0.0/16"
+azs                    = ["us-east-1a", "us-east-1b"]
+public_subnet_cidrs    = ["10.0.1.0/24", "10.0.2.0/24"]
+app_subnet_cidrs       = ["10.0.3.0/24", "10.0.4.0/24"]
+db_subnet_cidrs        = ["10.0.5.0/24", "10.0.6.0/24"]
+
+# If you need SSH access:
+# ec2_key_name        = "your-keypair-name"
+# ssh_ingress_cidr    = "YOUR_PUBLIC_IP/32"
+
+instance_type_web      = "t3.micro"
+instance_type_app      = "t3.micro"
+
+# Use ECR images (recommended) or any registry your instances can pull from:
+frontend_image         = "123456789012.dkr.ecr.us-east-1.amazonaws.com/chat-frontend:latest"
+backend_image          = "123456789012.dkr.ecr.us-east-1.amazonaws.com/chat-backend:latest"
+
+docdb_master_username  = "chatapp"
+docdb_instance_class   = "db.t3.medium"
+

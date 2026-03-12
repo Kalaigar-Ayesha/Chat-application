@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 
 .env
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*secrets*.tfvars
+terraform/secret*.tfvars
