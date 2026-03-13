@@ -1,30 +1,25 @@
-# frontend/Dockerfile
-# Build stage: compile the React/Vite app
+# Build stage
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and build
 COPY . .
 RUN npm run build
 
-# Production stage: serve with nginx
+# Production stage
 FROM nginx:alpine
 
-# Remove default nginx content and config
-RUN rm -rf /usr/share/nginx/html/* /etc/nginx/nginx.conf
+# Remove default static files
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copy custom nginx configuration that proxies /api/* to backend
+# Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy build artifacts from the previous stage
+# Copy React build
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose default http port
 EXPOSE 80
 
-# Run nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]
