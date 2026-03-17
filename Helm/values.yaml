@@ -44,4 +44,7 @@ service:
 secrets:
   mongodbUri: mongodb://mongo:27017/chat-app
   jwtSecret: supersecret
-  clientUrl: http://chatapp.local
+  clientUrl: http://chatapp-prod.local
+
+ingress:
+  host: chatapp-prod.local

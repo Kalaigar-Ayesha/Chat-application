@@ -8,11 +8,11 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - chatapp.local
+        - {{ .Values.ingress.host }}
       secretName: chatapp-tls
 
   rules:
-    - host: chatapp.local
+    - host: {{ .Values.ingress.host }}
       http:
         paths:
           - path: /
