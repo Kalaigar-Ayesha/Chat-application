@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chatapp.fullname" . }}-frontend
+spec:
+  replicas:  {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.service.frontendPort }}
+
+          env:
+            - name: REACT_APP_API_URL
+              value: "http://{{ include "chatapp.fullname" . }}-backend:5000"
+
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.frontendPort }}
+            initialDelaySeconds: 5
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "chatapp.fullname" . }}-frontend-config
