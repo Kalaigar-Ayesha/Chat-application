@@ -1,3 +1,4 @@
+{{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -9,7 +10,6 @@ spec:
     name: {{ include "chatapp.fullname" . }}-backend
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
-
   metrics:
     - type: Resource
       resource:
@@ -17,3 +17,4 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.cpuUtilization }}
+{{- end }}

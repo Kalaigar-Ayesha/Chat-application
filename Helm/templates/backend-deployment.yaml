@@ -15,6 +15,9 @@ spec:
         app: backend
 
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
 
       initContainers:
         - name: wait-for-mongo
@@ -35,8 +38,15 @@ spec:
           image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
           imagePullPolicy: Always
 
+          securityContext:
+            allowPrivilegeEscalation: false
+
           ports:
             - containerPort:  {{ .Values.service.backendPort }}
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "chatapp.fullname" . }}-backend-config
 
           env:
             - name: PORT
@@ -60,6 +70,13 @@ spec:
                   name: {{ include "chatapp.fullname" . }}-backend-secret
                   key: CLIENT_URL
 
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            failureThreshold: 30
+            periodSeconds: 10
+
           livenessProbe:
             httpGet:
               path: /health
@@ -75,9 +92,4 @@ spec:
             periodSeconds: 10
 
           resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 300m
-              memory: 256Mi
+            {{- toYaml .Values.backend.resources | nindent 12 }}

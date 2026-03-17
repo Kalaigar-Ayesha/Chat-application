@@ -1,12 +1,29 @@
+global:
+  environment: dev
+
 backend:
   image: kayesha01/chat-app-backend
   tag: latest
   replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
 
 frontend:
   image: kayesha01/chat-app-frontend
   tag: latest
   replicas: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
 
 mongo:
   image: mongo
@@ -14,6 +31,7 @@ mongo:
   storage: 5Gi
 
 autoscaling:
+  enabled: true
   minReplicas: 2
   maxReplicas: 6
   cpuUtilization: 50
@@ -22,3 +40,8 @@ service:
   backendPort: 5000
   frontendPort: 80
   mongoPort: 27017
+
+secrets:
+  mongodbUri: mongodb://mongo:27017/chat-app
+  jwtSecret: supersecret
+  clientUrl: http://chatapp.local

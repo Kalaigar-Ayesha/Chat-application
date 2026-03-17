@@ -2,16 +2,23 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "chatapp.fullname" . }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - chatapp.local
+      secretName: chatapp-tls
+
   rules:
-  - host: chatapp.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ include "chatapp.fullname" . }}-frontend
-            port:
-              number: 80
+    - host: chatapp.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "chatapp.fullname" . }}-frontend
+                port:
+                  number: {{ .Values.service.frontendPort }}

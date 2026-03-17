@@ -1,0 +1,7 @@
+Your Chat App has been deployed!
+
+Frontend URL:
+http://chatapp.local
+
+Backend:
+Internal service running on port {{ .Values.service.backendPort }}
