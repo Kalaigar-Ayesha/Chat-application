@@ -1,85 +1,10 @@
 # 💬 Full Stack Realtime Chat Application
 
-## 🏗️ Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           Chat Application Architecture                        │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React App     │    │   Nginx Proxy   │    │  Node.js API    │
-│   (Frontend)    │◄──►│   (Load Balance)│◄──►│   (Backend)     │
-│                 │    │                 │    │                 │
-│ • Real-time UI  │    │ • Static Files  │    │ • REST API      │
-│ • WebSocket     │    │ • SSL Termination│   │ • Socket.io     │
-│ • State Mgmt    │    │ • Routing       │    │ • Auth/JWT      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                     │
-                                                     ▼
-                                             ┌─────────────────┐
-                                             │   MongoDB      │
-                                             │   (Database)   │
-                                             │                 │
-                                             │ • Messages      │
-                                             │ • Users         │
-                                             │ • Sessions      │
-                                             └─────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              CI/CD Pipeline                                     │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   GitHub    │───►│   Jenkins   │───►│   Docker    │───►│  Docker Hub │
-│  Repository │    │    CI/CD    │    │   Build     │    │  Registry   │
-│             │    │             │    │             │    │             │
-│ • Source    │    │ • Tests     │    │ • Images    │    │ • Storage   │
-│ • Code      │    │ • Security  │    │ • Push      │    │ • Distribution│
-│ • Version   │    │ • Quality   │    │ • Scan      │    │ • Tags      │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           GitOps Deployment                                    │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   ArgoCD    │───►│    Helm     │───►│ Kubernetes  │───►│  Services   │
-│   (GitOps)  │    │   Charts    │    │   Cluster   │    │  (Running)  │
-│             │    │             │    │             │    │             │
-│ • Sync      │    │ • Templates │    │ • Pods      │    │ • Frontend  │
-│ • Deploy    │    │ • Values    │    │ • Services  │    │ • Backend   │
-│ • Monitor   │    │ • Release   │    │ • Ingress   │    │ • Database  │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                        Infrastructure as Code                                   │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  Terraform  │───►│     AWS     │───►│   VPC       │───►│  Resources  │
-│ (IaC Tool)  │    │   (Cloud)   │    │  (Network)  │    │ (Running)   │
-│             │    │             │    │             │    │             │
-│ • Code      │    │ • EC2       │    │ • Subnets   │    │ • Instances │
-│ • State     │    │ • DocumentDB│    │ • Security  │    │ • Storage   │
-│ • Plan      │    │ • IAM       │    │ • Routing   │    │ • Network   │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                          Observability Stack                                   │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Prometheus  │───►│   Grafana   │───►│    Loki     │───►│   Jaeger    │
-│ (Metrics)   │    │ (Dashboard) │    │  (Logs)     │    │ (Tracing)   │
-│             │    │             │    │             │    │             │
-│ • Collect   │    │ • Visualize │    │ • Aggregate │    │ • Trace     │
-│ • Store     │    │ • Alert     │    │ • Query     │    │ • Monitor   │
-│ • Query     │    │ • Reports   │    │ • Index     │    │ • Debug     │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-```
+![Chat Application Architecture](architecture-diagram.png)
 
 A production-ready, enterprise-grade chat application showcasing modern DevOps practices and cloud-native architecture. This project demonstrates end-to-end CI/CD pipelines, infrastructure as code, container orchestration, and comprehensive observability.
+
+## 🏗️ Architecture Overview
 
 Our application follows a microservices architecture with complete separation of concerns and enterprise-grade DevOps practices:
 
@@ -94,6 +19,11 @@ Our application follows a microservices architecture with complete separation of
 - **Jenkins CI Pipeline** - Automated testing, building, and security scanning
 - **Docker Hub** - Container registry for image distribution
 - **Multi-environment deployments** (Staging/Production)
+
+### **GitOps & Deployment**
+- **ArgoCD** - GitOps continuous deployment
+- **Helm Charts** - Kubernetes package management
+- **Kubernetes Cluster** - Container orchestration with Deployments, Services, and Ingress
 
 ### **Infrastructure as Code**
 - **Terraform** - AWS cloud infrastructure provisioning
