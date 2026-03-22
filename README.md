@@ -246,23 +246,6 @@ artillery run load-test.yml
 - Update documentation
 - Ensure CI/CD pipeline passes
 
-## 📝 License
-
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **MERN Stack** - For the amazing technology stack
-- **Socket.io** - Real-time communication capabilities
-- **Kubernetes** - Container orchestration platform
-- **DevOps Community** - Best practices and inspiration
-
-## 📞 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Join our Discord community
-- Check the documentation
 
 ---
 
