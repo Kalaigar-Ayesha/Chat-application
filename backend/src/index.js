@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
-import express from "express";
 import { connectDB } from "./lib/db.js";
 import { app } from "./app.js";
-import { server } from "./lib/socket.js";
+import { initializeSocket } from "./lib/socket.js";
 
 dotenv.config();
 
@@ -12,6 +11,8 @@ if (process.env.NODE_ENV !== "test" && !process.env.JWT_SECRET) {
 }
 
 const PORT = process.env.PORT || 5000;
+
+const { server } = initializeSocket(app);
 
 server.listen(PORT, () => {
   console.log("server is running on PORT:" + PORT);

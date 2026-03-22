@@ -1,0 +1,100 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chat-app-alerts
+  namespace: monitoring
+  labels:
+    app: chat-app-alerts
+spec:
+  groups:
+    - name: chat-app.rules
+      rules:
+        # High CPU usage alert
+        - alert: HighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total{pod=~"backend-.*"}[1m]) > 0.5
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage detected"
+            description: "CPU usage is above 50% for more than 2 minutes on pod {{ $labels.pod }}"
+
+        # High memory usage alert
+        - alert: HighMemoryUsage
+          expr: container_memory_usage_bytes{pod=~"backend-.*"} / container_spec_memory_limit_bytes > 0.8
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory usage detected"
+            description: "Memory usage is above 80% for more than 2 minutes on pod {{ $labels.pod }}"
+
+        # Backend pod restart alert
+        - alert: BackendPodRestart
+          expr: rate(kube_pod_container_status_restarts_total{pod=~"backend-.*"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backend pod restarted"
+            description: "Backend pod {{ $labels.pod }} has restarted {{ $value }} times in the last 5 minutes"
+
+        # High HTTP error rate alert
+        - alert: HighHTTPErrorRate
+          expr: rate(http_requests_total{status_code=~"5.."}[1m]) / rate(http_requests_total[1m]) > 0.1
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High HTTP error rate"
+            description: "HTTP error rate is above 10% for more than 1 minute"
+
+        # High HTTP response time alert
+        - alert: HighHTTPResponseTime
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1m])) > 1
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High HTTP response time"
+            description: "95th percentile response time is above 1 second for more than 2 minutes"
+
+        # Database connection alert
+        - alert: DatabaseConnectionHigh
+          expr: database_connections_active > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High database connections"
+            description: "Database connections are above 80 for more than 5 minutes"
+
+        # WebSocket connections alert
+        - alert: WebSocketConnectionsHigh
+          expr: websocket_active_connections > 1000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High WebSocket connections"
+            description: "WebSocket connections are above 1000 for more than 5 minutes"
+
+        # Pod not ready alert
+        - alert: PodNotReady
+          expr: kube_pod_status_ready{condition="true",pod=~"backend-.*"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod not ready"
+            description: "Pod {{ $labels.pod }} has been not ready for more than 1 minute"
+
+        # Node filesystem usage alert
+        - alert: NodeFilesystemUsage
+          expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node filesystem usage high"
+            description: "Filesystem usage is above 85% on node {{ $labels.instance }}"

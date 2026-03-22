@@ -32,8 +32,8 @@ spec:
 
       containers:
         - name: backend
-          image: kayesha01/chat-app-backend:latest
-          imagePullPolicy: Always
+          image: kayesha01/chat-app-backend:v7
+          imagePullPolicy: Never
 
           ports:
             - containerPort: 5000
